@@ -123,7 +123,7 @@ namespace TeamsMigrate
             var slackUserList = Utils.Users.ScanUsers(Path.Combine(slackArchiveBasePath, "users.json"));
 
             teamName = String.IsNullOrEmpty(CmdOptions.TeamsName) ?
-                "Archive " + teamName + " Slack " + DateTime.Now.ToUniversalTime() : "Archive " + CmdOptions.TeamsName + " Slack " + DateTime.Now.ToUniversalTime();
+                "Archive " + teamName + " Slack " + DateTime.Now.ToUniversalTime() : CmdOptions.TeamsName;
 
             //Creating new team in MS Teams
             var selectedTeamId = Utils.Channels.CreateNewTeam(teamName);
