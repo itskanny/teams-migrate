@@ -126,7 +126,8 @@ namespace TeamsMigrate
                 "Archive " + teamName + " Slack " + DateTime.Now.ToUniversalTime() : "Archive " + CmdOptions.TeamsName + " Slack " + DateTime.Now.ToUniversalTime();
 
             //Creating new team in MS Teams
-            var selectedTeamId = Utils.Channels.CreateNewTeam(teamName);
+            // var selectedTeamId = Utils.Channels.CreateNewTeam(teamName);
+            var selectedTeamId = Utils.Channels.SelectJoinedTeam(TeamsMigrate.Utils.Auth.AccessToken);
             if (selectedTeamId == null || "".Equals(selectedTeamId))
                 Environment.Exit(0);
 

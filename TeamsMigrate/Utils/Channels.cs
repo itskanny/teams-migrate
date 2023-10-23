@@ -410,6 +410,56 @@ namespace TeamsMigrate.Utils
                 log.Debug(httpResponseMessage.Content.ReadAsStringAsync().Result);
             }
         }
+        
+        public static string SelectJoinedTeam(string aadAccessToken)
+        {
+            MsTeams.Team msTeam = new MsTeams.Team();
+
+            Helpers.httpClient.DefaultRequestHeaders.Clear();
+            Helpers.httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", aadAccessToken);
+            Helpers.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var httpResponseMessage =
+                    Helpers.httpClient.GetAsync(O365.MsGraphBetaEndpoint + "me/joinedTeams").Result;
+            // Console.WriteLine("httpResponseMessage is  " + httpResponseMessage.Content.ReadAsStringAsync().Result);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                var httpResultString = httpResponseMessage.Content.ReadAsStringAsync().Result;
+                msTeam = JsonConvert.DeserializeObject<MsTeams.Team>(httpResultString);
+                Console.WriteLine("Groups " + httpResultString);
+            }
+            else
+            {
+                return "";
+            }
+
+            if (msTeam.value.Count == 0)
+            {
+                Console.WriteLine("");
+                Console.WriteLine("Whoops!");
+                Console.WriteLine("You're not a member of any existing Microsoft Teams");
+                Console.WriteLine("You must be a member of an existing Team before you can import channels.");
+                Console.WriteLine("");
+                Console.WriteLine("You can create a new Team right now!");
+                return CreateNewTeam(aadAccessToken);
+            }
+
+            Console.WriteLine("You're currently a member of these Teams");
+            Console.WriteLine("WARNING: If you don't have permission to create new channels for a given Team, your attempt to create or migrate channels will fail");
+            for (int i = 0; i < msTeam.value.Count; i++)
+            {
+                Console.WriteLine("[" + i + "]" + " " + msTeam.value[i].displayName + " " + msTeam.value[i].description);
+            }
+
+            Console.Write("Enter the destination Team number or type \"new\" to create a new Team: ");
+            var selectedTeamIndex = Console.ReadLine();
+            if(selectedTeamIndex.StartsWith("n", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return CreateNewTeam(aadAccessToken);
+            }
+            var selectedTeamId = msTeam.value[Convert.ToInt16(selectedTeamIndex)].id;
+            Console.WriteLine("Team ID is " + selectedTeamId);
+            return selectedTeamId;
+        }
 
         public static string CreateNewTeam(string newGroupAndTeamName = "")
         {
